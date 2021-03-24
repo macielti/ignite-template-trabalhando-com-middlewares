@@ -24,11 +24,41 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const {user} = request;
+
+  const numberOfTodo = user.todos.length; 
+  const userIsPro = user.pro;
+
+  if (!userIsPro && numberOfTodo < 10) {
+    return next();
+  } else if (userIsPro){
+    return next();
+  }
+
+  return response.status(403).json({error: 'user is not pro and already have 10 todos'});
+
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const {username} = request.headers;
+  const {id} = request.params;
+
+  if (!validate(id)) {
+    return response.status(400).json({error: "not valid uuid"});
+  }
+
+  const user = users.find((user) => user.username === username)
+
+  if (!user) return response.status(404).json({error: "user not found"});
+  
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if (!todo) return response.status(404).json({error: "todo not found"});
+
+  request.user = user;
+  request.todo = todo;
+
+  return next();
 }
 
 function findUserById(request, response, next) {
